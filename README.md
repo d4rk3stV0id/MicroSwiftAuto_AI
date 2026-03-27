@@ -1,5 +1,5 @@
 # MicroSwiftAuto_AI
-Empowering Rural Clinics with AI-Driven Insurance Processing
+Empowering Rural Clinics with AI-Driven Insurance Processing solutions
 
 Project Overview
 MicroSwiftAuto AI is an automated pipeline designed to bridge the gap between rural healthcare providers and micro-insurance firms. In rural settings, claim processing is often delayed by manual paperwork and slow verification. This project uses OCR and Natural Language Processing (NLP) to extract data from physical claim forms and automatically triage them based on risk and policy alignment.
