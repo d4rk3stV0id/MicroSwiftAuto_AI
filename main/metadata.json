@@ -1,0 +1,7 @@
+{
+  "name": "MicroSwiftAuto ai",
+  "description": "An AI-powered insurance claim filing assistant for simple, stress-free claims.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
