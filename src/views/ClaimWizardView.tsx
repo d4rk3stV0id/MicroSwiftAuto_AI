@@ -21,7 +21,7 @@ import { STAGGER_CONTAINER, STAGGER_ITEM } from '../constants';
 import { analyzeClaimDocuments, type ClaimMedicalDocKey } from '../lib/claimFormAnalysis';
 import { heuristicPdfMappings, mergeClaimPdfMappings } from '../lib/claimPdfMapping';
 import { fillInsurerClaimPdf, listClaimPdfAcroFieldNames } from '../lib/fillInsurerClaimPdf';
-import { downloadClaimFilledReportPdf as triggerClaimPdfDownload } from '../lib/claimReportPdf';
+import { downloadClaimFilledReportPdf as triggerClaimPdfDownload, buildClaimFilledReportPdf } from '../lib/claimReportPdf';
 import type { ClaimFormAnalysisResult } from '../types';
 
 function triggerBlobDownload(blob: Blob, filename: string) {
@@ -718,8 +718,39 @@ export const ClaimWizardView = () => {
                   type="button"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => toast('WhatsApp share will be added in a future update.')}
-                  className="flex w-full items-center justify-center gap-3 rounded-full bg-[#25D366] py-4 font-display font-bold text-white shadow-lg"
+                  disabled={!draft || !filedClaimId}
+                  onClick={async () => {
+                    if (!draft || !filedClaimId) return;
+                    const text = `My insurance claim draft is ready on ClaimSaathi!\n\nReference: *${filedClaimId}*\nAmount: *₹${draft.totalClaimAmountInr}*\n\n(Use your insurer's official channel to file this claim.)`;
+                    
+                    try {
+                      const safe = filedClaimId.replace(/[^\w.-]+/g, '_');
+                      let pdfBlob = filledInsurerPdfBlob;
+                      let filename = `ClaimSaathi_filled_insurer_form_${safe}.pdf`;
+                      if (!pdfBlob) {
+                        pdfBlob = buildClaimFilledReportPdf({ draft, claimRef: filedClaimId, preparedFor: user?.name });
+                        filename = `ClaimSaathi_filled_report_${safe}.pdf`;
+                      }
+                      
+                      const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+                      
+                      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                          title: 'ClaimSaathi Draft',
+                          text: text,
+                          files: [file]
+                        });
+                        return;
+                      }
+                    } catch (err) {
+                      console.error('Error sharing file:', err);
+                      if ((err as Error).name === 'AbortError') return;
+                    }
+                    
+                    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="flex w-full items-center justify-center gap-3 rounded-full bg-[#25D366] py-4 font-display font-bold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Share2 size={20} />
                   Share on WhatsApp
