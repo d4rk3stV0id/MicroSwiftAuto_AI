@@ -17,7 +17,7 @@ export async function analyzePolicyFromFile(file: File): Promise<{
 
   if (!hasGeminiKeyForPolicyAnalysis()) {
     throw new Error(
-      'Policy reading uses Google Gemini only (no on-device OCR). Add GEMINI_API_KEY to your .env file, restart `npm run dev`, then upload again.',
+      'Policy reading uses Google Gemini only (no on-device OCR). Set GEMINI_API_KEY (or VITE_GEMINI_API_KEY). For local dev, update .env and restart `npm run dev`. For Vercel, add the variable in Project Settings and redeploy.',
     );
   }
 

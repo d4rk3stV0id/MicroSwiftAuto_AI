@@ -14,6 +14,7 @@ import { fileToBase64, inferMimeType } from './localDocumentText';
 import type { ClaimMedicalBundle } from '../types';
 import { callOpenAiResponses, parseJsonFromModelText, type OpenAiFileInput } from './openaiClient';
 import { buildGeminiModelFallbackChain, isRetryableGeminiModelError } from './geminiModelChain';
+import { readEnv } from './runtimeEnv';
 
 const MAX_VISION_BYTES_PER_FILE = 7 * 1024 * 1024;
 const MAX_VISION_TOTAL_BYTES = 22 * 1024 * 1024;
@@ -23,18 +24,12 @@ const VISION_JPEG_QUALITY = 0.86;
 const OPENAI_CLAIM_MODEL_FALLBACKS = ['gpt-4.1-mini', 'gpt-4o-mini'];
 
 function envStr(name: string): string | undefined {
-  if (name === 'GEMINI_API_KEY') return typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined;
-  if (name === 'OPENAI_API_KEY') return typeof process !== 'undefined' ? process.env.OPENAI_API_KEY : undefined;
-  if (name === 'CLAIM_VISION') return typeof process !== 'undefined' ? process.env.CLAIM_VISION : undefined;
-  if (name === 'GEMINI_CLAIM_MODEL') return typeof process !== 'undefined' ? process.env.GEMINI_CLAIM_MODEL : undefined;
-  if (name === 'OPENAI_CLAIM_MODEL') return typeof process !== 'undefined' ? process.env.OPENAI_CLAIM_MODEL : undefined;
-
-  const p =
-    typeof process !== 'undefined'
-      ? (process as unknown as { env?: Record<string, string | undefined> }).env
-      : undefined;
-  const v = p?.[name]?.trim();
-  return v || undefined;
+  if (name === 'GEMINI_API_KEY') return readEnv('GEMINI_API_KEY', 'VITE_GEMINI_API_KEY');
+  if (name === 'OPENAI_API_KEY') return readEnv('OPENAI_API_KEY', 'VITE_OPENAI_API_KEY');
+  if (name === 'CLAIM_VISION') return readEnv('CLAIM_VISION', 'VITE_CLAIM_VISION');
+  if (name === 'GEMINI_CLAIM_MODEL') return readEnv('GEMINI_CLAIM_MODEL', 'VITE_GEMINI_CLAIM_MODEL');
+  if (name === 'OPENAI_CLAIM_MODEL') return readEnv('OPENAI_CLAIM_MODEL', 'VITE_OPENAI_CLAIM_MODEL');
+  return readEnv(name, `VITE_${name}`);
 }
 
 function getGeminiKey(): string | undefined {

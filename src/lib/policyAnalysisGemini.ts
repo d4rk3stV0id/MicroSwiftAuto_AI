@@ -3,18 +3,16 @@ import type { Policy } from '../types';
 import { buildGeminiModelFallbackChain, isRetryableGeminiModelError } from './geminiModelChain';
 import { fileToBase64, inferMimeType } from './localDocumentText';
 import { parseJsonFromModelText } from './openaiClient';
+import { readEnv } from './runtimeEnv';
 
 const MAX_POLICY_BYTES = 14 * 1024 * 1024;
 
 function envStr(name: string): string | undefined {
-  if (name === 'GEMINI_API_KEY') return typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined;
-  if (name === 'GEMINI_POLICY_ANALYSIS_MODEL') return typeof process !== 'undefined' ? process.env.GEMINI_POLICY_ANALYSIS_MODEL : undefined;
-  
-  const p =
-    typeof process !== 'undefined'
-      ? (process as unknown as { env?: Record<string, string | undefined> }).env
-      : undefined;
-  return p?.[name]?.trim() || undefined;
+  if (name === 'GEMINI_API_KEY') return readEnv('GEMINI_API_KEY', 'VITE_GEMINI_API_KEY');
+  if (name === 'GEMINI_POLICY_ANALYSIS_MODEL') {
+    return readEnv('GEMINI_POLICY_ANALYSIS_MODEL', 'VITE_GEMINI_POLICY_ANALYSIS_MODEL');
+  }
+  return readEnv(name, `VITE_${name}`);
 }
 
 export function hasGeminiKeyForPolicyAnalysis(): boolean {
