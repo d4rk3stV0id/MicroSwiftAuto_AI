@@ -2,16 +2,12 @@ import { GoogleGenAI, createPartFromText, createUserContent } from '@google/gena
 import type { Language, Policy } from '../types';
 import { buildGeminiModelFallbackChain, isRetryableGeminiModelError } from './geminiModelChain';
 import type { PolicyChatTurn } from './policyChat';
+import { readEnv } from './runtimeEnv';
 
 function envStr(name: string): string | undefined {
-  if (name === 'GEMINI_API_KEY') return typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined;
-  if (name === 'GEMINI_POLICY_CHAT_MODEL') return typeof process !== 'undefined' ? process.env.GEMINI_POLICY_CHAT_MODEL : undefined;
-  
-  const p =
-    typeof process !== 'undefined'
-      ? (process as unknown as { env?: Record<string, string | undefined> }).env
-      : undefined;
-  return p?.[name]?.trim() || undefined;
+  if (name === 'GEMINI_API_KEY') return readEnv('GEMINI_API_KEY', 'VITE_GEMINI_API_KEY');
+  if (name === 'GEMINI_POLICY_CHAT_MODEL') return readEnv('GEMINI_POLICY_CHAT_MODEL', 'VITE_GEMINI_POLICY_CHAT_MODEL');
+  return readEnv(name, `VITE_${name}`);
 }
 
 function getGeminiKey(): string | undefined {
