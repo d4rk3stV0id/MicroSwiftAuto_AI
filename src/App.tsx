@@ -2,7 +2,12 @@ import { Toaster } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import { useStore } from './store/useStore';
 import { AuthView } from './views/AuthView';
-import { clearSupabaseLocalSession, isSupabaseEnabled, supabase } from './lib/supabase';
+import {
+  clearSupabaseLocalSession,
+  isSupabaseEnabled,
+  supabase,
+  supabaseConfigurationMessage,
+} from './lib/supabase';
 import { Layout } from './components/Layout';
 import { DashboardView } from './views/DashboardView';
 import { PolicyReaderView } from './views/PolicyReaderView';
@@ -65,6 +70,19 @@ export default function App() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-text-muted">
         <p className="text-sm font-medium">Signing you in…</p>
+      </div>
+    );
+  }
+
+  if (supabaseConfigurationMessage) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 px-6 text-center text-slate-200">
+        <h1 className="max-w-md text-lg font-semibold text-white">Sign-in is misconfigured</h1>
+        <p className="max-w-lg text-sm text-slate-400">{supabaseConfigurationMessage}</p>
+        <p className="max-w-lg text-xs text-slate-500">
+          Copy <code className="text-slate-300">.env.example</code> to <code className="text-slate-300">.env</code>
+          , set real Supabase values, then restart <code className="text-slate-300">npm run dev</code>.
+        </p>
       </div>
     );
   }
