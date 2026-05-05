@@ -29,3 +29,8 @@ export const STAGGER_ITEM = {
   initial: { y: 20, opacity: 0 },
   animate: { y: 0, opacity: 1 }
 };
+
+/** One-time access fee to unlock the File a claim wizard (Razorpay). */
+export const CLAIM_FILING_FEE_INR = 100;
+/** Amount in smallest currency unit (paise) for INR. */
+export const CLAIM_FILING_FEE_PAISE = CLAIM_FILING_FEE_INR * 100;

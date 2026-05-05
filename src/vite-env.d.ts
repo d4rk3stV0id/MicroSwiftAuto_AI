@@ -3,6 +3,13 @@
 interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_ANON_KEY: string;
+  /** Razorpay Key ID (e.g. rzp_test_...). Safe to expose to the browser. */
+  readonly VITE_RAZORPAY_KEY_ID: string | undefined;
+  /**
+   * Optional: POST endpoint that creates a Razorpay order and returns `{ orderId, amount, currency }`.
+   * Same-origin path works on Vercel, e.g. `/api/create-razorpay-order`.
+   */
+  readonly VITE_RAZORPAY_ORDER_URL: string | undefined;
 }
 
 /** Web Speech API (Chrome / Edge); not in all TS lib targets. */

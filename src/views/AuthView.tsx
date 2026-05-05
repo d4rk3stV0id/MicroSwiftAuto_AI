@@ -24,16 +24,23 @@ export const AuthView = () => {
       clearSupabaseLocalSession();
       await supabase.auth.signOut({ scope: 'local' });
 
+      let loginPayload: Awaited<ReturnType<typeof supabase.auth.signInWithPassword>>['data'] | null = null;
+
       if (isLogin) {
         const { data: authData, error } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
+        loginPayload = authData;
         authError = error;
         // Apply session immediately so the app gate does not render the dashboard before Zustand has a user id
         // (otherwise claims would only update locally and never reach Supabase).
         if (!error && authData.session) {
           setSession(authData.session);
+        } else if (!error && !authData.session) {
+          toast.error(
+            'Sign-in did not return a session. If email confirmation is required in Supabase Auth, verify your inbox first.',
+          );
         }
       } else {
         const { error } = await supabase.auth.signUp({
@@ -61,7 +68,7 @@ export const AuthView = () => {
         } else {
           toast.error(authError.message);
         }
-      } else if (isLogin) {
+      } else if (isLogin && loginPayload?.session) {
         toast.success('Welcome back!');
         setOnboarded(true); // Assuming login signals onboarding is complete
       }
