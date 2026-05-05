@@ -12,11 +12,20 @@ import { Layout } from './components/Layout';
 import { DashboardView } from './views/DashboardView';
 import { PolicyReaderView } from './views/PolicyReaderView';
 import { ClaimWizardView } from './views/ClaimWizardView';
+import { ClaimPaymentView } from './views/ClaimPaymentView';
 import { ClaimTrackerView } from './views/ClaimTrackerView';
 import { ProfileView } from './views/ProfileView';
 
 export default function App() {
-  const { currentTab, theme, session, isAuthenticated, setSession, hydrateUserData } = useStore();
+  const {
+    currentTab,
+    theme,
+    session,
+    isAuthenticated,
+    claimFilingFeePaid,
+    setSession,
+    hydrateUserData,
+  } = useStore();
   /** Avoid showing login UI until the first getSession() finishes (prevents a one-frame “logged out” flash). */
   const [supabaseAuthReady, setSupabaseAuthReady] = useState(!isSupabaseEnabled);
 
@@ -103,7 +112,7 @@ export default function App() {
       case 'policy':
         return <PolicyReaderView />;
       case 'claims':
-        return <ClaimWizardView />;
+        return claimFilingFeePaid ? <ClaimWizardView /> : <ClaimPaymentView />;
       case 'profile':
         return <ProfileView />;
       default:

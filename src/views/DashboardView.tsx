@@ -115,9 +115,35 @@ export const DashboardView = () => {
   };
 
   const actions = [
-    { id: 'policy', label: 'My Policy & Ask AI', icon: BookOpen, desc: 'View coverage, chat with ClaimSaathi', color: 'bg-primary/10 text-primary', tab: 'policy' },
-    { id: 'file', label: 'File a Claim', icon: ShieldCheck, desc: 'Start a new insurance claim', color: 'bg-accent/10 text-accent', tab: 'claims' },
-    { id: 'track', label: 'My Claims', icon: ClipboardList, desc: 'View & track all your claims', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-400/20 dark:text-indigo-200', tab: 'profile', subAction: 'policies' },
+    {
+      id: 'policy',
+      label: 'My Policy & Ask AI',
+      icon: BookOpen,
+      desc: 'View coverage, chat with ClaimSaathi',
+      color: 'bg-primary/10 text-primary',
+      tab: 'policy',
+      pricingBadge: 'Free feature',
+      pricingBadgeVariant: 'free' as const,
+    },
+    {
+      id: 'file',
+      label: 'File a Claim',
+      icon: ShieldCheck,
+      desc: 'Start a new insurance claim',
+      color: 'bg-accent/10 text-accent',
+      tab: 'claims',
+      pricingBadge: 'Paid · ₹100',
+      pricingBadgeVariant: 'paid' as const,
+    },
+    {
+      id: 'track',
+      label: 'My Claims',
+      icon: ClipboardList,
+      desc: 'View & track all your claims',
+      color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-400/20 dark:text-indigo-200',
+      tab: 'profile',
+      subAction: 'policies',
+    },
   ];
 
   const handleActionClick = (action: typeof actions[0]) => {
@@ -302,6 +328,20 @@ export const DashboardView = () => {
                     <div className="space-y-1.5">
                       <h4 className="font-display text-[15px] font-bold text-text-main">{action.label}</h4>
                       <p className="text-sm leading-relaxed text-text-muted">{action.desc}</p>
+                      {'pricingBadge' in action && action.pricingBadge && (
+                        <div className="pt-2">
+                          <span
+                            className={cn(
+                              'inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ring-1',
+                              action.pricingBadgeVariant === 'free'
+                                ? 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/25 dark:bg-emerald-400/15 dark:text-emerald-300'
+                                : 'bg-amber-500/10 text-amber-900 ring-amber-500/20 dark:bg-amber-400/15 dark:text-amber-100',
+                            )}
+                          >
+                            {action.pricingBadge}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </AnimatedCard>
                 );

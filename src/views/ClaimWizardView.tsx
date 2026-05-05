@@ -105,7 +105,7 @@ export const ClaimWizardView = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [filedClaimId, setFiledClaimId] = useState<string | null>(null);
 
-  const { user, addClaim, setCurrentTab } = useStore();
+  const { user, addClaim, setCurrentTab, setClaimFilingFeePaid } = useStore();
   const medicalInputRefs = useRef<Partial<Record<ClaimMedicalDocKey, HTMLInputElement>>>({});
   const formInputRef = useRef<HTMLInputElement>(null);
   const autoPdfFingerprint = useRef<string | null>(null);
@@ -770,6 +770,18 @@ export const ClaimWizardView = () => {
           ) : null}
         </AnimatePresence>
       </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          setClaimFilingFeePaid(false);
+          setCurrentTab('claims');
+          toast('Payment gate re-enabled for demo.', { icon: 'ℹ️' });
+        }}
+        className="fixed bottom-24 right-6 z-40 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-700 shadow-lg transition hover:bg-slate-50 dark:border-white/20 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 lg:right-10"
+      >
+        Demo: Show Payment
+      </button>
     </div>
   );
 };

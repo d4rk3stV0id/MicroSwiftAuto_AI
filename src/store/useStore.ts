@@ -17,6 +17,8 @@ interface AppState {
   user: User | null;
   session: Session | null;
   isAuthenticated: boolean;
+  /** Razorpay filing fee paid for this user (localStorage). */
+  claimFilingFeePaid: boolean;
   activePolicy: Policy | null;
   /** Raw upload kept in memory for Policy Saathi Q&A (not persisted). */
   policyDocument: { base64: string; mimeType: string; extractedText?: string } | null;
@@ -32,6 +34,7 @@ interface AppState {
   setLanguage: (lang: Language) => void;
   setOnboarded: (val: boolean) => void;
   setCurrentTab: (tab: 'home' | 'policy' | 'claims' | 'profile') => void;
+  setClaimFilingFeePaid: (paid: boolean) => void;
   hydrateUserData: (userId: string) => Promise<void>;
   applyPolicyAnalysis: (policy: Policy, document: { base64: string; mimeType: string; extractedText?: string }) => Promise<void>;
   clearActivePolicy: () => void;
@@ -44,6 +47,20 @@ interface AppState {
 
 /** Keys persisted to localStorage for user profile. */
 const USER_PROFILE_KEY = 'claimsaathi-user-profile';
+
+function claimFeeStorageKey(userId: string | undefined | null): string {
+  const id = userId?.trim() || 'local-guest';
+  return `claimsaathi-claim-fee:${id}`;
+}
+
+function readClaimFilingFeePaid(userId: string | undefined | null): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(claimFeeStorageKey(userId)) === '1';
+  } catch {
+    return false;
+  }
+}
 
 function loadSavedUserProfile(): User | null {
   if (typeof window === 'undefined') return null;
@@ -71,6 +88,7 @@ export const useStore = create<AppState>((set) => {
     user: savedUser,
     session: null,
     isAuthenticated: false,
+    claimFilingFeePaid: readClaimFilingFeePaid(savedUser?.id),
     activePolicy: null,
     policyDocument: null,
     claims: [],
@@ -82,7 +100,7 @@ export const useStore = create<AppState>((set) => {
 
     setUser: (user) => {
       saveUserProfile(user);
-      set({ user });
+      set({ user, claimFilingFeePaid: readClaimFilingFeePaid(user?.id) });
     },
     setSession: (session) => {
       let mappedUser = null;
@@ -98,16 +116,30 @@ export const useStore = create<AppState>((set) => {
       const savedLocal = loadSavedUserProfile();
       const mergedUser = mappedUser ? { ...savedLocal, ...mappedUser } : savedLocal;
       if (mergedUser) saveUserProfile(mergedUser);
-      set({ 
-        session, 
+      const uid = mergedUser?.id;
+      set({
+        session,
         isAuthenticated: !!session,
         user: mergedUser,
+        claimFilingFeePaid: readClaimFilingFeePaid(uid),
         ...(session ? {} : { activePolicy: null, policyDocument: null, claims: [] }),
       });
     },
     setLanguage: (language) => set({ language }),
     setOnboarded: (onboarded) => set({ onboarded }),
     setCurrentTab: (currentTab) => set({ currentTab }),
+    setClaimFilingFeePaid: (paid) => {
+      set((state) => {
+        const uid = state.session?.user?.id ?? state.user?.id ?? 'local-guest';
+        try {
+          if (paid) localStorage.setItem(claimFeeStorageKey(uid), '1');
+          else localStorage.removeItem(claimFeeStorageKey(uid));
+        } catch {
+          /* ignore quota / privacy mode */
+        }
+        return { claimFilingFeePaid: paid };
+      });
+    },
     hydrateUserData: async (userId) => {
       try {
         const [policy, claims, dbProfile] = await Promise.all([
